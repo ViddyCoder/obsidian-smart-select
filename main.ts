@@ -158,12 +158,11 @@ function savePosition(editor: Editor) {
 	lastAnchor = editor.getCursor("anchor");
 }
 
-const HEADER_PATTERN = /^(#+)[^\S\r\n]+.*/gm;
+const HEADER_PATTERN = /^(#+)[^\S\r\n]*.*/gm;
 function smartSelectSection(editor: Editor) {
 	const cursorPosA = editor.getCursor("anchor");
 	const cursorPosB = editor.getCursor("head");
 	const lineText = editor.getLine(cursorPosA.line);
-
 	const lineA = cursorPosA.line;
 	const match = HEADER_PATTERN.exec(editor.getLine(lineA));
 	if (!match) {
