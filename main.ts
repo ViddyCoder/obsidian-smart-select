@@ -114,7 +114,6 @@ function smartSelect(editor: Editor) {
 		matchPositions.push([index, length]);
 	}
 
-	let foundSelection = false;
 	for (var i = matchPositions.length - 1; i >= 0; i--) {
 		let posA = matchPositions[i][0];
 		let posB = posA + matchPositions[i][1];
@@ -134,22 +133,12 @@ function smartSelect(editor: Editor) {
 			break;
 		}
 
-		foundSelection = true;
 		console.debug("A selection was found!");
 		editor.setSelection({line: cursorPosA.line, ch: posA}, {line: cursorPosA.line, ch: posB});
 		break;		
 	}
-
-	if (!foundSelection) {
-		console.debug("A selection was not found. Rerun at the next granularity.");
-		gNextGranularity = GraduatedSelectionDict[gNextGranularity];
-		smartSelect(editor);
-		return;
-	}
-
+	
 	savePosition(editor);
-	gNextGranularity = GraduatedSelectionDict[gNextGranularity];
-	console.debug("Setting next granularity to: " + gNextGranularity.valueOf());
 }
 
 let lastHead: EditorPosition;
@@ -254,14 +243,12 @@ function smartSelectSection(editor: Editor) {
 	const cursorPosB = editor.getCursor("head");
 	const lineA = cursorPosA.line;
 	const lineText = editor.getLine(lineA);
-	console.log(lineText);
 	
 	HEADER_PATTERN.lastIndex = 0;
 	const match = HEADER_PATTERN.exec(lineText);
 
 	if (!match) {
 		console.debug("No header match");
-		console.debug(lineText);
 		return;
 	}
 
