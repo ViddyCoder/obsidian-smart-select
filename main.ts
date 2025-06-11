@@ -113,6 +113,26 @@ function smartSelect(editor: Editor) {
 		}
 		matchPositions.push([index, length]);
 	}
+	
+	/*
+	if (gNextGranularity === Granularity.Word && matchPositions.length > 0) {
+		// Modify final match position.
+		let lastIndex = matchPositions.length - 1;
+		let lineLength = editor.getLine(cursorPosB.line).length;
+		let wordEndPos = matchPositions[lastIndex][0] + matchPositions[lastIndex][1];
+		matchPositions[lastIndex][1] = matchPositions[lastIndex][1] + lineLength - wordEndPos;
+	}
+	*/
+	
+	if (gNextGranularity === Granularity.Word && matchPositions.length > 0) {
+		// Add a final match position.
+		let lastIndex = matchPositions.length - 1;
+		let lineLength = editor.getLine(cursorPosB.line).length;
+		let wordEndPos = matchPositions[lastIndex][0] + matchPositions[lastIndex][1];
+		if (wordEndPos < lineLength) {
+			matchPositions.push([wordEndPos, lineLength - wordEndPos]);
+		}
+	}
 
 	for (var i = matchPositions.length - 1; i >= 0; i--) {
 		let posA = matchPositions[i][0];
@@ -131,6 +151,14 @@ function smartSelect(editor: Editor) {
 			console.debug("New selection equals old. Go up one granularity.");
 			smartSelect(editor);
 			break;
+		}
+		
+		if (gNextGranularity === Granularity.Word && i > 0) { // Edge case. Cursor is between last word and last period at end of paragraph.
+			let nextA = matchPositions[i-1][0];
+			let nextB = nextA + matchPositions[i-1][1];
+			if (cursorPosA.ch === posA && cursorPosA.ch === nextB) {
+				continue;
+			}
 		}
 
 		console.debug("A selection was found!");
