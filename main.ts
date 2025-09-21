@@ -79,7 +79,7 @@ function smartSelect(editor: Editor) {
 		return;
 	}
 	
-	let paragraphIndex = GraduatedSelectionList.findIndex(item => item === Granularity.Sentence);
+	let paragraphIndex = GraduatedSelectionList.findIndex(item => item === Granularity.Paragraph);
 	const currentIndex = GraduatedSelectionList.findIndex(item => item === gNextGranularity);
 
 	if (currentIndex >= paragraphIndex) {
