@@ -225,7 +225,7 @@ function smartSelectCluster(editor: Editor) {
 	let lineText = editor.getLine(lineA).trim();
 	if (lineText.charAt(0) === "#") {
 		console.log("we're at a section");
-		editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: lineB.length});
+		editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: editor.getLine(lineB).length});
 		gNextGranularity = Granularity.Section;
 		smartSelectSection(editor);
 		return;
@@ -252,12 +252,12 @@ function smartSelectCluster(editor: Editor) {
 		lineB++;
 	}
 	
-	editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: lineB.length});
+	editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: editor.getLine(lineB).length});
 	
 	if (!cursorChanged(editor)) {
 		lineB++;
-		if (lineText = editor.getLine(lineB).trim().charAt(0) !== "#") {
-			editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: lineB.length});		
+		if (editor.getLine(lineB).trim().charAt(0) !== "#") {
+			editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: editor.getLine(lineB).length});		
 		}
 	}
 	
