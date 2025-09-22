@@ -50,8 +50,8 @@ const WORD_SEARCH_RADIUS = 500; // 1000 Characters
 
 function smartSelect(editor: Editor) {
 
-	const cursorPosA = editor.getCursor("anchor");
-	const cursorPosB = editor.getCursor("head");
+	let cursorPosA = editor.getCursor("anchor");
+	let cursorPosB = editor.getCursor("head");
 	const lineText = editor.getLine(cursorPosA.line);
 
 	if (lineText.trimEnd().length === 0) {
@@ -60,7 +60,7 @@ function smartSelect(editor: Editor) {
 	
 	console.debug("Processing current granularity: " + gNextGranularity.valueOf());
 
-	if(cursorChanged(editor)) {
+	if (cursorChanged(editor)) {
 		gNextGranularity = gDefaultGranularity;
 		console.debug("Granularity reset to default");
 	}
@@ -80,6 +80,8 @@ function smartSelect(editor: Editor) {
 		return;
 	}
 	
+
+
 	let paragraphIndex = GraduatedSelectionList.findIndex(item => item === Granularity.Paragraph);
 	const currentIndex = GraduatedSelectionList.findIndex(item => item === gNextGranularity);
 
@@ -90,6 +92,12 @@ function smartSelect(editor: Editor) {
 		return;
 	}
 	
+	moveHeadIfBetweenWhitespace(editor);
+	normalizeSelectionRightward(editor);
+
+	cursorPosA = editor.getCursor("anchor");
+	cursorPosB = editor.getCursor("head");
+
 	let match;
 	let matchPositions = [];
 	let pattern = GranularityToPattern[gNextGranularity];
@@ -212,6 +220,54 @@ function smartSelectParagraph(editor: Editor) {
 		gNextGranularity = Granularity.Cluster;
 		console.debug("Para Setting next granularity to: " + gNextGranularity.valueOf());
 	}
+}
+
+const isWs = (c?: string) => !!c && /\s/.test(c);
+
+export function moveHeadIfBetweenWhitespace(editor: Editor) {
+  const anchor = editor.getCursor("anchor" as any);
+  const head   = editor.getCursor("head" as any);
+
+  const lineText = editor.getLine(head.line) ?? "";
+  const leftChar  = head.ch > 0 ? lineText[head.ch - 1] : undefined;
+  const rightChar = head.ch < lineText.length ? lineText[head.ch] : undefined;
+
+  if (isWs(leftChar) && isWs(rightChar)) {
+    // look for first non-whitespace character strictly to the right of head
+    let targetCh = head.ch;
+    for (let i = head.ch; i < lineText.length; i++) {
+      if (!/\s/.test(lineText[i])) {
+        targetCh = i;
+        break;
+      }
+    }
+
+    if (head.ch !== targetCh) {
+      const newHead: EditorPosition = { line: head.line, ch: targetCh };
+		const selectionText = editor.getSelection();
+		const hasSelection = selectionText.length > 0;
+	  if (hasSelection) editor.setSelection(anchor, newHead);
+	  else editor.setSelection(newHead, newHead);
+    }
+  }
+}
+
+function isAnchorAfterHead(anchor: EditorPosition, head: EditorPosition): boolean {
+  if (anchor.line > head.line) return true;
+  if (anchor.line < head.line) return false;
+  return anchor.ch > head.ch;
+}
+
+function normalizeSelectionRightward(editor: Editor) {
+  const anchor = editor.getCursor("anchor" as any);
+  const head   = editor.getCursor("head" as any);
+
+  if (anchor.line === head.line && anchor.ch === head.ch) return; // caret only
+
+  if (isAnchorAfterHead(anchor, head)) {
+    // Swap: make selection forward
+    editor.setSelection(head, anchor);
+  }
 }
 
 const NEWLINE_PATTERN = /^[\r\n]+$/gm;
