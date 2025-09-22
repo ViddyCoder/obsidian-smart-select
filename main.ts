@@ -27,7 +27,8 @@ const GraduatedSelectionDict = {
 	[Granularity.Section] : Granularity.Section
 };
 
-let gNextGranularity = Granularity.Word;
+const gDefaultGranularity = Granularity.Clause;
+let gNextGranularity = gDefaultGranularity;
 
 const SECTION_PATTERN = /((.*[\r\n])*)#+\s/gm;
 const CLUSTER_PATTERN = /(?:.*(?:\r?\n|$))+?(?=\r?\n\r?\n|$)/gm;
@@ -60,8 +61,8 @@ function smartSelect(editor: Editor) {
 	console.debug("Processing current granularity: " + gNextGranularity.valueOf());
 
 	if(cursorChanged(editor)) {
-		gNextGranularity = Granularity.Word;
-		console.debug("granularity reset to word");
+		gNextGranularity = gDefaultGranularity;
+		console.debug("Granularity reset to default");
 	}
 
 	if (gNextGranularity === Granularity.Section) {
