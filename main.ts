@@ -308,7 +308,8 @@ function smartSelectCluster(editor: Editor) {
 		lineB++;
 	}
 	
-	editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: editor.getLine(lineB).length});
+	// editor.setSelection({line: lineA, ch: 0}, {line: lineB, ch: editor.getLine(lineB).length});
+	editor.setSelection({line: lineA, ch: 0}, {line: lineB + 1, ch: 0});
 	
 	if (!cursorChanged(editor)) {
 		lineB++;
